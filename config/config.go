@@ -11,7 +11,6 @@ import (
 
 var (
 	json = jsoniter.ConfigCompatibleWithStandardLibrary
-	conf *Config
 )
 
 type Config struct {
@@ -19,20 +18,22 @@ type Config struct {
 	LastModifyTime int64
 	Lock           *sync.RWMutex
 	Data           []interface{}
+	C              chan bool
 }
 
-func NewConfig(filename string, data []interface{}) *Config {
+func NewConfig(filename string, data []interface{}) (conf *Config) {
 	conf = &Config{
 		Filename: filename,
 		Data:     data,
 		Lock:     &sync.RWMutex{},
+		C:        make(chan bool),
 	}
 
 	conf.parse()
 
 	go conf.reload()
 
-	return conf
+	return
 }
 
 func (c *Config) parse() bool {
@@ -65,24 +66,28 @@ func (c *Config) reload() {
 		if currModifyTime > c.LastModifyTime {
 			if c.parse() {
 				log.Println("重新加载配置文件conf.json")
+				c.C <- true
 			}
 		}
 	}
 }
 
 func (c *Config) Get(key string) (node interface{}, ok bool) {
+	c.Lock.Lock()
 	data := make(map[string]interface{}, 0)
-	for i, _ := range conf.GetData() {
-		n := conf.Data[i].(map[string]interface{})
+	for i, _ := range c.Data {
+		n := c.Data[i].(map[string]interface{})
 		data[n["id"].(string)] = n
 	}
+	c.Lock.Unlock()
+
 	node, ok = data[key]
 	return
 }
 
 func (c *Config) GetData() (data []interface{}) {
-	c.Lock.Lock()
-	data = conf.Data
-	c.Lock.Unlock()
+	c.Lock.RLock()
+	data = c.Data
+	c.Lock.RUnlock()
 	return
 }
