@@ -57,6 +57,7 @@ func (es *echoServer) OnInitComplete(srv gnet.Server) (action gnet.Action) {
 
 func (es *echoServer) React(frame []byte, c gnet.Conn) (out []byte, action gnet.Action) {
 	buf := bytes.NewBuffer(frame)
+	//取出消息类型
 	t, err := utils.TrimLine(buf)
 	if err != nil {
 		_ = c.Close()
@@ -64,67 +65,69 @@ func (es *echoServer) React(frame []byte, c gnet.Conn) (out []byte, action gnet.
 	}
 
 	if len(t) > 0 {
+		closer := true //控制关闭
+
 		switch t[0] {
 		case msg.AuthorizeMessage:
-			id, err := utils.TrimLine(buf)
-			if err != nil {
-				_ = c.Close()
-				return
-			}
-
-			strId := string(id[:])
-			if node, ok := config.GetConf(strId); ok {
-				m := node.(map[string]interface{})
-				enable := m["enable"].(bool)
-				if enable {
-					authorizes[c.RemoteAddr().String()] = strId
-					richNodeList[strId].Online = true
-					out = msg.Write(msg.SuccessAuthorizeMessage)
+			if id, err := utils.TrimLine(buf); err == nil {
+				strId := string(id[:])
+				if node, ok := config.GetConf(strId); ok {
+					m := node.(map[string]interface{})
+					enable := m["enable"].(bool)
+					if enable {
+						authorizes[c.RemoteAddr().String()] = strId
+						richNodeList[strId].Online = true
+						out = msg.Write(msg.SuccessAuthorizeMessage)
+					} else {
+						out = msg.Write(msg.NotEnableFailMessage)
+					}
 				} else {
-					out = msg.Write(msg.NotEnableFailMessage)
+					out = msg.Write(msg.NotExistFailMessage)
 				}
-			} else {
-				out = msg.Write(msg.NotExistFailMessage)
+
+				closer = false
 			}
 		case msg.ReceiveMessage:
-			id, err := utils.TrimLine(buf)
-			if err != nil {
-				_ = c.Close()
-				return
+			if localId, ok := authorizes[c.RemoteAddr().String()]; ok {
+				if localId != "" {
+					//取出id
+					if id, err := utils.TrimLine(buf); err == nil {
+						strId := string(id[:])
+						if localId == strId {
+							//取出数据
+							if sys, err := utils.TrimLine(buf); err == nil {
+								richNodeList[strId].SystemInfo.Set(sys)
+								closer = false
+							}
+						}
+					}
+					closer = false
+				}
 			}
-
-			localId, ok := authorizes[c.RemoteAddr().String()]
-			if !ok {
-				_ = c.Close()
-				return
-			}
-
-			if localId == "" {
-				_ = c.Close()
-				return
-			}
-
-			strId := string(id[:])
-			if localId != strId {
-				_ = c.Close()
-				return
-			}
-
-			sys, err := utils.TrimLine(buf)
-			if err != nil {
-				_ = c.Close()
-				return
-			}
-
-			richNodeList[strId].SystemInfo.Set(sys)
 		case msg.HeartbeatMessage:
-			out = msg.Write(msg.HeartbeatMessage, "pong")
+			localId, ok := authorizes[c.RemoteAddr().String()]
+			if ok {
+				if localId != "" {
+					if id, err := utils.TrimLine(buf); err == nil {
+						strId := string(id[:])
+						if localId == strId {
+							out = msg.Write(msg.HeartbeatMessage, "pong")
+							closer = false
+						}
+					}
+				}
+			}
 		case msg.CloseMessage:
 			//主动关闭
-			_ = c.Close()
+			closer = true
 		default:
 			//不明来历链接全关咯
+			closer = true
+		}
+
+		if closer {
 			_ = c.Close()
+			return
 		}
 	}
 
