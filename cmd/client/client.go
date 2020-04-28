@@ -1,116 +1,120 @@
 package client
 
 import (
-    "ServerStatus/cmd"
-    "ServerStatus/cmd/system"
-    "ServerStatus/config"
-    "ServerStatus/msg"
-    "bytes"
-    "fmt"
-    "log"
-    "net"
-    "os"
-    "time"
+	"ServerStatus/cmd"
+	"ServerStatus/config"
+	"ServerStatus/msg"
+	"ServerStatus/timer"
+	"bytes"
+	"fmt"
+	"log"
+	"net"
+	"os"
+	"strings"
+	"time"
 )
 
 var (
-    params   *cmd.Cmd
-    buffer   = bytes.NewBuffer(make([]byte, 0))
-    emptyBuf = make([]byte, 4096)
-    buf      = make([]byte, 4096)
+	params *cmd.Cmd
+	sys    *msg.SystemInfo
+	conn   net.Conn
+	err    error
+
+	buffer   = bytes.NewBuffer(make([]byte, 0))
+	emptyBuf = make([]byte, 4096)
+	buf      = make([]byte, 4096)
 )
 
-//发送验证消息
-func auth(c net.Conn, id string) {
-    authMsg := bytes.NewBuffer(make([]byte, 0))
-    authMsg.WriteByte(msg.AuthorizeMessage)
-    authMsg.WriteString(id)
-
-    _, err := c.Write(authMsg.Bytes())
-    if err != nil {
-        _ = c.Close()
-    }
+func write(msg []byte) {
+	_, err := conn.Write(msg)
+	if err != nil {
+		_ = conn.Close()
+	}
 }
 
-func ticker(callback func(), interval time.Duration) {
-    ticker := time.NewTicker(interval)
-    //defer ticker.Stop()
-
-    for range ticker.C{
-        callback()
-    }
+//发送验证消息
+func auth() {
+	write(msg.Write(msg.AuthorizeMessage, params.Id))
 }
 
 //发送心跳
-func heartbeat(c net.Conn, interval time.Duration) {
-    ticker(func() {
-        if _, err := c.Write(msg.Write(msg.PingMessage, params.Id)); err != nil {
-            _ = c.Close()
-        }
-    }, interval)
+func heartbeat(interval time.Duration) {
+	callback := func() {
+		write(msg.Write(msg.HeartbeatMessage, params.Id))
+	}
+
+	timer.New(callback, interval)
 }
 
 //发送通过验证的消息
-func sent(c net.Conn, interval time.Duration) {
-    sys := system.NewSystemInfo(params.Convert)
+func sent(interval time.Duration) {
+	callback := func() {
+		sys.Update()
+		packet, _ := sys.Json()
+		write(msg.Write(msg.ReceiveMessage, params.Id, packet))
+	}
 
-    ticker(func() {
-        sys.Update()
-        packet, _ := sys.Json()
-        if _, err := c.Write(msg.Write(msg.ReceiveMessage, params.Id, packet)); err != nil {
-            _ = c.Close()
-        } else {
-            //log.Printf("[SENT] %s\n", packet)
-        }
-    }, interval)
+	timer.New(callback, interval)
 }
 
 //发送关闭链接消息
-func closeSent(c net.Conn) {
-    if _, err := c.Write(msg.Write(msg.CloseMessage)); err != nil {
-        _ = c.Close()
-    }
+func closeSent() {
+	write(msg.Write(msg.CloseMessage))
+}
+
+func close(m ...string) {
+	echo(m...)
+	closeSent()
+}
+
+func echo(m ...string) {
+	log.Println(strings.Join(append(make([]string, 0), m...), " "))
 }
 
 func Run(p *cmd.Cmd) {
-    params = p
-    if p.Interval <= 0 {
-        p.Interval = config.IntervalSent //限制发送间隔要大于等于一秒
-    }
+	params = p
+	if p.Interval <= 0 {
+		p.Interval = config.IntervalSent //限制发送间隔要大于等于一秒
+	}
 
-    conn, err := net.Dial("tcp", fmt.Sprintf("%s:%d", p.Host, p.Port))
-    if err != nil {
-        panic(err)
-    }
-    //defer conn.Close()
+	sys = &msg.SystemInfo{}
+	go sys.GetTraffic()
 
-    for {
-        if _, err := conn.Read(buf); err != nil {
-            closeSent(conn)
-            os.Exit(0)
-        } else {
-            buffer.Write(buf)
-        }
+	conn, err = net.Dial("tcp", fmt.Sprintf("%s:%d", p.Host, p.Port))
+	if err != nil {
+		panic(err)
+	}
+	defer conn.Close()
 
-        typeMessage, _ := buffer.ReadByte()
-        switch typeMessage {
-        case msg.AuthorizeMessage:
-            auth(conn, p.Id)
-        case msg.SuccessAuthorizeMessage:
-            log.Println("[AUTHORIZE] success")
-            go sent(conn, p.Interval)
-            go heartbeat(conn, time.Second*config.IntervalHeartbeat)
-        case msg.FailAuthorizeMessage:
-            log.Println("[AUTHORIZE] fail")
-            closeSent(conn)
-        case msg.CloseMessage:
-            log.Println("[CLOSE]")
-            closeSent(conn)
-        case msg.PongMessage:
-            log.Println("[PONG]")
-        }
+	for {
+		if _, err := conn.Read(buf); err != nil {
+			closeSent()
+			os.Exit(1)
+		} else {
+			buffer.Write(buf)
+		}
 
-        copy(buf, emptyBuf)
-        buffer.Reset()
-    }
+		t, _ := buffer.ReadByte()
+		switch t {
+		case msg.AuthorizeMessage:
+			auth()
+		case msg.SuccessAuthorizeMessage:
+			log.Println("[AUTHORIZE]", "success")
+			sent(p.Interval)
+			heartbeat(time.Second * config.IntervalHeartbeat)
+		case msg.NotExistFailMessage:
+			log.Println("[FAIL]", "not exist")
+			closeSent()
+		case msg.NotEnableFailMessage:
+			close("[FAIL]", "not enable")
+		case msg.HeartbeatMessage:
+			echo("[HEARTBEAT]")
+		case msg.CloseMessage:
+			close("[CLOSE]")
+
+		}
+
+		copy(buf, emptyBuf)
+		buffer.Reset()
+	}
 }

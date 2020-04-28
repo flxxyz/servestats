@@ -1,56 +1,60 @@
 package msg
 
+type TypeMessage int
+
 const (
-    AuthorizeMessage = iota + 30
-    SuccessAuthorizeMessage
-    FailAuthorizeMessage
-    ReceiveMessage
-    CloseMessage
-    PingMessage
-    PongMessage
+	AuthorizeMessage byte = iota + 30
+	SuccessAuthorizeMessage
+	NotExistFailMessage
+	NotEnableFailMessage
+	ReceiveMessage
+	CloseMessage
+	HeartbeatMessage
 )
 
 type Node struct {
-    Id       string `json:"id"`
-    Name     string `json:"name"`
-    Location string `json:"location"`
-    Enable   bool   `json:"enable"`
-    Region   string `json:"region"`
+	Id       string `json:"id"`
+	Name     string `json:"name"`
+	Location string `json:"location"`
+	Enable   bool   `json:"-"`
+	Region   string `json:"region"`
 }
 
 type RichNode struct {
-    *Node
+	*Node
+	*SystemInfo
+	Online bool `json:"online"`
+}
 
+func NewRichNode(node *Node, sys *SystemInfo, online bool) *RichNode {
+	return &RichNode{node, sys, online}
 }
 
 type Response struct {
-    Message string `json:"message"`
-    Data    []Node `json:"data"`
+	Message string      `json:"message"`
+	Servers []*RichNode `json:"servers"`
 }
 
-func NewResponse(message string, nodes []Node) *Response {
-    return &Response{
-        Message: message,
-        Data:    nodes,
-    }
+func (rsp *Response) Json() (data []byte, err error) {
+	data, err = json.Marshal(rsp)
+	return
 }
 
-type TestMsg struct {
-    A int         `json:"a"`
-    B string      `json:"b"`
-    C interface{} `json:"c"`
+func (rsp *Response) JsonFormat(prefix, indent string) (data []byte, err error) {
+	data, err = json.MarshalIndent(rsp, prefix, indent)
+
+	return
 }
 
-func NewTestMsg() *TestMsg {
-    return &TestMsg{
-        A: 666,
-        B: "测试",
-        C: struct {
-            Num0 interface{} `json:"0"`
-            One  interface{} `json:"one"`
-        }{
-            Num0: "one",
-            One:  "two",
-        },
-    }
+func NewResponse(message string, richNodes map[string]*RichNode) (r *Response) {
+	r = &Response{
+		Message: message,
+		Servers: make([]*RichNode, 0),
+	}
+
+	for key, _ := range richNodes {
+		r.Servers = append(r.Servers, richNodes[key])
+	}
+
+	return
 }
