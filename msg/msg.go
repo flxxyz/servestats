@@ -13,7 +13,7 @@ const (
 )
 
 type Node struct {
-	Id       string `json:"id"`
+	Id       string `json:"-"`
 	Name     string `json:"name"`
 	Location string `json:"location"`
 	Enable   bool   `json:"-"`
