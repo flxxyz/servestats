@@ -44,7 +44,6 @@ func (es *echoServer) OnClosed(c gnet.Conn, _ error) (action gnet.Action) {
 				richNodeList[id].Reset()
 				richNodeList[id].Online = false
 			}
-			log.Println("[CLOSE] 关闭链接")
 		}
 		es.sockets.Delete(id)
 	}
@@ -154,7 +153,6 @@ func response(m string) (rsp []byte) {
 	//清除配置中不存在的节点
 	for id, _ := range checkNodes {
 		if _, ok := conf.Get(id); !ok {
-			log.Println("[Not Exist Node]", ok)
 			delete(richNodeList, id)
 			delete(checkNodes, id)
 

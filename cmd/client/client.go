@@ -103,10 +103,10 @@ func Run(p *cmd.Cmd) {
 			sent(p.Interval)
 			heartbeat(time.Second * config.IntervalHeartbeat)
 		case msg.NotExistFailMessage:
-			log.Println("[FAIL]", "not exist")
+			log.Println("[FAIL]", "This node is not exist")
 			closeSent()
 		case msg.NotEnableFailMessage:
-			close("[FAIL]", "not enable")
+			close("[FAIL]", "This node is not enable")
 		case msg.HeartbeatMessage:
 			echo("[HEARTBEAT]")
 		case msg.CloseMessage:
