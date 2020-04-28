@@ -70,12 +70,19 @@ func (c *Config) reload() {
 	}
 }
 
-func GetConf(key string) (node interface{}, ok bool) {
+func (c *Config) Get(key string) (node interface{}, ok bool) {
 	data := make(map[string]interface{}, 0)
-	for i, _ := range conf.Data {
+	for i, _ := range conf.GetData() {
 		n := conf.Data[i].(map[string]interface{})
 		data[n["id"].(string)] = n
 	}
 	node, ok = data[key]
+	return
+}
+
+func (c *Config) GetData() (data []interface{}) {
+	c.Lock.Lock()
+	data = conf.Data
+	c.Lock.Unlock()
 	return
 }

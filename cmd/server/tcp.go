@@ -71,7 +71,7 @@ func (es *echoServer) React(frame []byte, c gnet.Conn) (out []byte, action gnet.
 		case msg.AuthorizeMessage:
 			if id, err := utils.TrimLine(buf); err == nil {
 				strId := string(id[:])
-				if node, ok := config.GetConf(strId); ok {
+				if node, ok := conf.Get(strId); ok {
 					m := node.(map[string]interface{})
 					enable := m["enable"].(bool)
 					if enable {
@@ -134,9 +134,10 @@ func (es *echoServer) React(frame []byte, c gnet.Conn) (out []byte, action gnet.
 	return
 }
 
-func response(m string) (data []byte) {
-	for i, _ := range conf.Data {
-		m := conf.Data[i].(map[string]interface{})
+func response(m string) (rsp []byte) {
+	data := conf.GetData()
+	for i, _ := range data {
+		m := data[i].(map[string]interface{})
 		id := m["id"].(string)
 
 		if _, ok := richNodeList[id]; !ok {
@@ -154,13 +155,15 @@ func response(m string) (data []byte) {
 	}
 
 	r := msg.NewResponse(m, richNodeList)
-	data, _ = r.Json()
+	rsp, _ = r.Json()
 	return
 }
 
 func Run(p *cmd.Cmd) {
 	conf = config.NewConfig(p.Filename, make([]interface{}, 0))
 	echo := &echoServer{}
+
+	_ = response("init")
 
 	go func() {
 		log.Fatal(gnet.Serve(echo,
