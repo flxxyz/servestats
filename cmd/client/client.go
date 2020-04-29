@@ -77,7 +77,7 @@ func Run(p *cmd.Cmd) {
 		p.Interval = config.IntervalSent //限制发送间隔要大于等于一秒
 	}
 
-	sys = &msg.SystemInfo{}
+	sys = &msg.SystemInfo{IsConvStr: p.IsConvStr}
 	go sys.GetTraffic()
 
 	conn, err = net.Dial("tcp", fmt.Sprintf("%s:%d", p.Host, p.Port))

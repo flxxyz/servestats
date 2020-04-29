@@ -38,6 +38,7 @@ var (
 )
 
 type SystemInfo struct {
+	IsConvStr         bool
 	err               error
 	cpuInfos          []cpu.InfoStat
 	load              *load.AvgStat
@@ -172,7 +173,9 @@ func (sys *SystemInfo) getBootTime() {
 func (sys *SystemInfo) getUptime() {
 	sys.uptime = time.Now()
 	diff := sys.uptime.Unix() - sys.bootTime.Unix()
-	sys.Uptime, sys.UptimeStr = utils.ComputeTimeDiff(diff)
+	if sys.Uptime, sys.UptimeStr = utils.ComputeTimeDiff(diff); !sys.IsConvStr {
+		sys.UptimeStr = ""
+	}
 }
 
 func (sys *SystemInfo) GetTraffic() {
@@ -196,7 +199,7 @@ func (sys *SystemInfo) GetTraffic() {
 	}
 }
 
-func (sys *SystemInfo) toString() {
+func (sys *SystemInfo) ToString() {
 	sys.MemTotalStr = utils.FileSize(sys.MemTotal)
 	sys.MemFreeStr = utils.FileSize(sys.MemFree)
 	sys.MemUsedStr = utils.FileSize(sys.MemUsed)
@@ -225,7 +228,9 @@ func (sys *SystemInfo) Update() {
 	sys.getBootTime()
 	sys.getUptime()
 
-	sys.toString()
+	if sys.IsConvStr {
+		sys.ToString()
+	}
 }
 
 func (sys *SystemInfo) Reset() {
