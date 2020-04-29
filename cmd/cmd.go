@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"ServerStatus/msg"
 	"flag"
 	"fmt"
 	"os"
@@ -148,9 +147,7 @@ func Run() *Cmd {
 	case "traffic":
 		handlerTraffic(args)
 	case "help":
-		//usage()
-		m := &msg.SystemInfo{}
-		m.GetNet()
+		usage()
 	default:
 		unknownCommand()
 	}
