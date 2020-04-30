@@ -38,45 +38,45 @@ var (
 )
 
 type SystemInfo struct {
-	IsConvStr         bool
+	HasConvStr        bool `json:"-" xml:"-"`
 	err               error
 	cpuInfos          []cpu.InfoStat
 	load              *load.AvgStat
-	PhysicalCpuCore   int        `json:"physical_cpu_core"`
-	LogicalCpuCore    int        `json:"logical_cpu_core"`
-	CpuCore           int        `json:"cpu_core"`
-	CpuPercent        float64    `json:"cpu_percent"`
-	LoadAvg           [3]float64 `json:"load_avg"`
-	MemTotal          uint64     `json:"mem_total"`
-	MemFree           uint64     `json:"mem_free"`
-	MemUsed           uint64     `json:"mem_used"`
-	MemTotalStr       string     `json:"mem_total_str"`
-	MemFreeStr        string     `json:"mem_free_str"`
-	MemUsedStr        string     `json:"mem_used_str"`
-	SwapTotal         uint64     `json:"swap_total"`
-	SwapFree          uint64     `json:"swap_free"`
-	SwapUsed          uint64     `json:"swap_used"`
-	SwapTotalStr      string     `json:"swap_total_str"`
-	SwapFreeStr       string     `json:"swap_free_str"`
-	SwapUsedStr       string     `json:"swap_used_str"`
-	HDDTotal          uint64     `json:"hdd_total"`
-	HDDFree           uint64     `json:"hdd_free"`
-	HDDUsed           uint64     `json:"hdd_used"`
-	HDDTotalStr       string     `json:"hdd_total_str"`
-	HDDFreeStr        string     `json:"hdd_free_str"`
-	HDDUsedStr        string     `json:"hdd_used_str"`
+	PhysicalCpuCore   int        `json:"physical_cpu_core" xml:"physical_cpu_core"`
+	LogicalCpuCore    int        `json:"logical_cpu_core" xml:"logical_cpu_core"`
+	CpuCore           int        `json:"cpu_core" xml:"cpu_core"`
+	CpuPercent        float64    `json:"cpu_percent" xml:"cpu_percent"`
+	LoadAvg           [3]float64 `json:"load_avg" xml:"load_avg"`
+	MemTotal          uint64     `json:"mem_total" xml:"mem_total"`
+	MemFree           uint64     `json:"mem_free" xml:"mem_free"`
+	MemUsed           uint64     `json:"mem_used" xml:"mem_used"`
+	MemTotalStr       string     `json:"mem_total_str" xml:"mem_total_str"`
+	MemFreeStr        string     `json:"mem_free_str" xml:"mem_free_str"`
+	MemUsedStr        string     `json:"mem_used_str" xml:"mem_used_str"`
+	SwapTotal         uint64     `json:"swap_total" xml:"swap_total"`
+	SwapFree          uint64     `json:"swap_free" xml:"swap_free"`
+	SwapUsed          uint64     `json:"swap_used" xml:"swap_used"`
+	SwapTotalStr      string     `json:"swap_total_str" xml:"swap_total_str"`
+	SwapFreeStr       string     `json:"swap_free_str" xml:"swap_free_str"`
+	SwapUsedStr       string     `json:"swap_used_str" xml:"swap_used_str"`
+	HDDTotal          uint64     `json:"hdd_total" xml:"hdd_total"`
+	HDDFree           uint64     `json:"hdd_free" xml:"hdd_free"`
+	HDDUsed           uint64     `json:"hdd_used" xml:"hdd_used"`
+	HDDTotalStr       string     `json:"hdd_total_str" xml:"hdd_total_str"`
+	HDDFreeStr        string     `json:"hdd_free_str" xml:"hdd_free_str"`
+	HDDUsedStr        string     `json:"hdd_used_str" xml:"hdd_used_str"`
 	bootTime          time.Time
 	uptime            time.Time
-	Uptime            int64  `json:"uptime"`
-	UptimeStr         string `json:"uptime_str"`
-	TrafficRx         uint64 `json:"traffic_rx"`
-	TrafficRxStr      string `json:"traffic_rx_str"`
-	TrafficRxTotal    uint64 `json:"traffic_rx_total"`
-	TrafficRxTotalStr string `json:"traffic_rx_total_str"`
-	TrafficTx         uint64 `json:"traffic_tx"`
-	TrafficTxStr      string `json:"traffic_tx_str"`
-	TrafficTxTotal    uint64 `json:"traffic_tx_total"`
-	TrafficTxTotalStr string `json:"traffic_tx_total_str"`
+	Uptime            int64  `json:"uptime" xml:"uptime"`
+	UptimeStr         string `json:"uptime_str" xml:"uptime_str"`
+	TrafficRx         uint64 `json:"traffic_rx" xml:"traffic_rx"`
+	TrafficRxStr      string `json:"traffic_rx_str" xml:"traffic_rx_str"`
+	TrafficRxTotal    uint64 `json:"traffic_rx_total" xml:"traffic_rx_total"`
+	TrafficRxTotalStr string `json:"traffic_rx_total_str" xml:"traffic_rx_total_str"`
+	TrafficTx         uint64 `json:"traffic_tx" xml:"traffic_tx"`
+	TrafficTxStr      string `json:"traffic_tx_str" xml:"traffic_tx_str"`
+	TrafficTxTotal    uint64 `json:"traffic_tx_total" xml:"traffic_tx_total"`
+	TrafficTxTotalStr string `json:"traffic_tx_total_str" xml:"traffic_tx_total_str"`
 }
 
 func (sys *SystemInfo) getCpuInfo() {
@@ -173,7 +173,7 @@ func (sys *SystemInfo) getBootTime() {
 func (sys *SystemInfo) getUptime() {
 	sys.uptime = time.Now()
 	diff := sys.uptime.Unix() - sys.bootTime.Unix()
-	if sys.Uptime, sys.UptimeStr = utils.ComputeTimeDiff(diff); !sys.IsConvStr {
+	if sys.Uptime, sys.UptimeStr = utils.ComputeTimeDiff(diff); !sys.HasConvStr {
 		sys.UptimeStr = ""
 	}
 }
@@ -197,6 +197,11 @@ func (sys *SystemInfo) GetTraffic() {
 
 		time.Sleep(time.Second * config.IntervalRefreshTraffic)
 	}
+}
+
+func (sys *SystemInfo) GetNet() (connections []net.ConnectionStat) {
+	connections, _ = net.Connections("inet6")
+	return
 }
 
 func (sys *SystemInfo) ToString() {
@@ -228,7 +233,7 @@ func (sys *SystemInfo) Update() {
 	sys.getBootTime()
 	sys.getUptime()
 
-	if sys.IsConvStr {
+	if sys.HasConvStr {
 		sys.ToString()
 	}
 }

@@ -8,52 +8,52 @@ import (
 )
 
 const (
-	Version   = "0.0.3"
-	Host      = ""
-	Port      = 9001
-	HTTPPort  = 9002
-	MultiCore = true
-	Tick      = 3
-	Filename  = "./config.json"
-	ID        = ""
-	IsConvStr = true
+	Version    = "0.0.4"
+	Host       = ""
+	Port       = 9001
+	HTTPPort   = 9002
+	MultiCore  = true
+	Tick       = 3
+	Filename   = "./config.json"
+	ID         = ""
+	HasConvStr = true
 )
 
 var (
 	serverCmd, clientCmd, uuidCmd, systemCmd, trafficCmd *flag.FlagSet
 
-	host      string
-	port      int
-	httpPort  int
-	multicore bool
-	interval  time.Duration
-	filename  string
-	id        string
-	isConvStr bool
+	host       string
+	port       int
+	httpPort   int
+	multicore  bool
+	interval   time.Duration
+	filename   string
+	id         string
+	hasConvStr bool
 )
 
 type Params struct {
-	Host      string
-	Port      int
-	HTTPPort  int
-	Multicore bool
-	Interval  time.Duration
-	Filename  string
-	Id        string
-	IsConvStr bool
+	Host       string
+	Port       int
+	HTTPPort   int
+	Multicore  bool
+	Interval   time.Duration
+	Filename   string
+	Id         string
+	HasConvStr bool
 }
 
 func NewParams(host string, port, httpPort int, multicore bool,
-	interval time.Duration, filename string, id string, isConvStr bool) (p *Params) {
+	interval time.Duration, filename string, id string, hasConvStr bool) (p *Params) {
 	return &Params{
-		Host:      host,
-		Port:      port,
-		HTTPPort:  httpPort,
-		Multicore: multicore,
-		Interval:  interval,
-		Filename:  filename,
-		Id:        id,
-		IsConvStr: isConvStr,
+		Host:       host,
+		Port:       port,
+		HTTPPort:   httpPort,
+		Multicore:  multicore,
+		Interval:   interval,
+		Filename:   filename,
+		Id:         id,
+		HasConvStr: hasConvStr,
 	}
 }
 
@@ -110,7 +110,7 @@ func handlerClient(args []string) {
 	clientCmd.BoolVar(&multicore, "m", MultiCore, "multicore")
 	clientCmd.DurationVar(&interval, "t", Tick, "pushing tick")
 	clientCmd.StringVar(&id, "id", ID, "uuid")
-	clientCmd.BoolVar(&isConvStr, "s", IsConvStr, "convert string")
+	clientCmd.BoolVar(&hasConvStr, "s", HasConvStr, "convert string")
 	clientCmd.Parse(args)
 }
 
@@ -152,5 +152,5 @@ func Run() *Cmd {
 		unknownCommand()
 	}
 
-	return NewCmd(t, NewParams(host, port, httpPort, multicore, interval, filename, id, isConvStr))
+	return NewCmd(t, NewParams(host, port, httpPort, multicore, interval, filename, id, hasConvStr))
 }

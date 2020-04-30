@@ -5,12 +5,11 @@ import (
 	"ServerStatus/config"
 	"ServerStatus/msg"
 	"ServerStatus/timer"
+	"ServerStatus/utils"
 	"bytes"
 	"fmt"
-	"log"
 	"net"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -62,22 +61,13 @@ func closeSent() {
 	write(msg.Write(msg.CloseMessage))
 }
 
-func close(m ...string) {
-	echo(m...)
-	closeSent()
-}
-
-func echo(m ...string) {
-	log.Println(strings.Join(append(make([]string, 0), m...), " "))
-}
-
 func Run(p *cmd.Cmd) {
 	params = p
 	if p.Interval <= 0 {
 		p.Interval = config.IntervalSent //限制发送间隔要大于等于一秒
 	}
 
-	sys = &msg.SystemInfo{IsConvStr: p.IsConvStr}
+	sys = &msg.SystemInfo{HasConvStr: p.HasConvStr}
 	go sys.GetTraffic()
 
 	conn, err = net.Dial("tcp", fmt.Sprintf("%s:%d", p.Host, p.Port))
@@ -99,19 +89,20 @@ func Run(p *cmd.Cmd) {
 		case msg.AuthorizeMessage:
 			auth()
 		case msg.SuccessAuthorizeMessage:
-			log.Println("[AUTHORIZE]", "success")
+			utils.Echo("[AUTHORIZE]", "success")
 			sent(p.Interval)
 			heartbeat(time.Second * config.IntervalHeartbeat)
+		case msg.HeartbeatMessage:
+			utils.Echo("[HEARTBEAT]")
 		case msg.NotExistFailMessage:
-			log.Println("[FAIL]", "This node is not exist")
+			utils.Echo("[FAIL]", "This node is not exist")
 			closeSent()
 		case msg.NotEnableFailMessage:
-			close("[FAIL]", "This node is not enable")
-		case msg.HeartbeatMessage:
-			echo("[HEARTBEAT]")
+			utils.Echo("[FAIL]", "This node is not enable")
+			closeSent()
 		case msg.CloseMessage:
-			close("[CLOSE]")
-
+			utils.Echo("[CLOSE]")
+			closeSent()
 		}
 
 		copy(buf, emptyBuf)

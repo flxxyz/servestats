@@ -1,5 +1,9 @@
 package msg
 
+import (
+	"encoding/xml"
+)
+
 type TypeMessage int
 
 const (
@@ -13,17 +17,17 @@ const (
 )
 
 type Node struct {
-	Id       string `json:"-"`
-	Name     string `json:"name"`
-	Location string `json:"location"`
-	Enable   bool   `json:"-"`
-	Region   string `json:"region"`
+	Id       string `json:"-" xml:"-"`
+	Name     string `json:"name" xml:"name"`
+	Location string `json:"location" xml:"location"`
+	Enable   bool   `json:"-" xml:"-"`
+	Region   string `json:"region" xml:"region"`
 }
 
 type RichNode struct {
 	*Node
 	*SystemInfo
-	Online bool `json:"online"`
+	Online bool `json:"online" xml:"online"`
 }
 
 func NewRichNode(node *Node, sys *SystemInfo, online bool) *RichNode {
@@ -31,12 +35,15 @@ func NewRichNode(node *Node, sys *SystemInfo, online bool) *RichNode {
 }
 
 type Response struct {
-	Message string      `json:"message"`
-	Servers []*RichNode `json:"servers"`
+	Message    string      `json:"message" xml:"message"`
+	Servers    []*RichNode `json:"server" xml:"server"`
+	UpdateChan chan string `json:"-" xml:"-"`
+	Data       []byte      `json:"-" xml:"-"`
 }
 
 func (rsp *Response) Json() (data []byte, err error) {
 	data, err = json.Marshal(rsp)
+
 	return
 }
 
@@ -46,15 +53,35 @@ func (rsp *Response) JsonFormat(prefix, indent string) (data []byte, err error) 
 	return
 }
 
-func NewResponse(message string, richNodes map[string]*RichNode) (r *Response) {
-	r = &Response{
-		Message: message,
-		Servers: make([]*RichNode, 0),
+func (rsp *Response) XML() (data []byte, err error) {
+	data, err = xml.Marshal(rsp)
+
+	return
+}
+
+func (rsp *Response) XMLFormat(prefix, indent string) (data []byte, err error) {
+	data, err = xml.MarshalIndent(rsp, prefix, indent)
+
+	return
+}
+
+func (rsp *Response) Update(richNodeList map[string]*RichNode) {
+	rsp.Servers = rsp.Servers[0:0]
+	for key, _ := range richNodeList {
+		rsp.Servers = append(rsp.Servers, richNodeList[key])
 	}
 
-	for key, _ := range richNodes {
-		r.Servers = append(r.Servers, richNodes[key])
+	return
+}
+
+func NewResponse(message string, richNodeList map[string]*RichNode) (r *Response) {
+	r = &Response{
+		Message:    message,
+		Servers:    make([]*RichNode, 0),
+		UpdateChan: make(chan string, 0),
 	}
+
+	r.Update(richNodeList)
 
 	return
 }
