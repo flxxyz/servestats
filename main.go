@@ -7,11 +7,9 @@ import (
 	"ServerStatus/cmd/system"
 	"ServerStatus/cmd/traffic"
 	"ServerStatus/cmd/uuid"
-	"ServerStatus/timer"
 )
 
 func main() {
-	go timer.Run()
 	c := cmd.Run()
 
 	switch c.T {

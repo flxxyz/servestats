@@ -78,7 +78,7 @@ func NewResponse(message string, richNodeList map[string]*RichNode) (r *Response
 	r = &Response{
 		Message:    message,
 		Servers:    make([]*RichNode, 0),
-		UpdateChan: make(chan string, 0),
+		UpdateChan: make(chan string, 1024),
 	}
 
 	r.Update(richNodeList)

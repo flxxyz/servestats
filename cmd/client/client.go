@@ -5,6 +5,7 @@ import (
 	"ServerStatus/config"
 	"ServerStatus/msg"
 	"ServerStatus/timer"
+	"ServerStatus/utils"
 	"bytes"
 	"fmt"
 	"log"
@@ -85,21 +86,27 @@ func Run(p *cmd.Cmd) {
 			buffer.Write(buf)
 		}
 
-		t, _ := buffer.ReadByte()
-		switch t {
+		//取出消息类型
+		t, err := utils.TrimLine(buffer)
+		if err != nil {
+			return
+		}
+
+		switch t[0] {
 		case msg.AuthorizeMessage:
 			auth()
 		case msg.SuccessAuthorizeMessage:
 			log.Println("[AUTHORIZE]", "success")
-			sent(p.Interval)
-			heartbeat(config.IntervalHeartbeat)
+			go sent(p.Interval)
+			go heartbeat(config.IntervalHeartbeat)
 		case msg.HeartbeatMessage:
-			log.Println("[HEARTBEAT]")
+			pong, _ := utils.TrimLine(buffer)
+			log.Println("[HEARTBEAT]", string(pong))
 		case msg.NotExistFailMessage:
-			log.Println("[FAIL]", "This node is not exist")
+			log.Println("[FAIL]", "This Node is not exist")
 			closeSent()
 		case msg.NotEnableFailMessage:
-			log.Println("[FAIL]", "This node is not enable")
+			log.Println("[FAIL]", "This Node is not enable")
 			closeSent()
 		case msg.CloseMessage:
 			log.Println("[CLOSE]")

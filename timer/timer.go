@@ -5,35 +5,30 @@ import (
 )
 
 var (
-	queue chan *T
+	timer *T
 )
 
 type T struct {
-	Interval time.Duration
-	Callback func()
+	s map[int]*time.Ticker
+	i int
 }
 
-func Run() {
-	for {
-		select {
-		case t, ok := <-queue:
-			if ok {
-				ticker := time.NewTicker(t.Interval)
-				for range ticker.C {
-					t.Callback()
-				}
-			}
-		}
-	}
+func (t *T) add(ticker *time.Ticker) int {
+	t.s[t.i] = ticker
+	return t.i
 }
 
-func New(callback func(), interval time.Duration) {
-	queue <- &T{
-		Interval: interval,
-		Callback: callback,
+func New(callback func(), interval time.Duration) (i int) {
+	i = timer.add(time.NewTicker(interval))
+	for range timer.s[i].C {
+		callback()
 	}
+	return
 }
 
 func init() {
-	queue = make(chan *T)
+	timer = &T{
+		s: make(map[int]*time.Ticker, 0),
+		i: 0,
+	}
 }

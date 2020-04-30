@@ -1,12 +1,12 @@
 package config
 
 import (
+	"ServerStatus/timer"
 	jsoniter "github.com/json-iterator/go"
 	"io/ioutil"
 	"log"
 	"os"
 	"sync"
-	"time"
 )
 
 var (
@@ -59,35 +59,29 @@ func (c *Config) parse() bool {
 }
 
 func (c *Config) reload() {
-	ticker := time.NewTicker(time.Second * IntervalReloadConfig)
-	for range ticker.C {
+	_ = timer.New(func() {
 		fileInfo, _ := os.Stat(c.Filename)
 		currModifyTime := fileInfo.ModTime().Unix()
 		if currModifyTime > c.LastModifyTime {
 			if c.parse() {
-				log.Println("重新加载配置文件conf.json")
 				c.C <- true
 			}
 		}
-	}
+	}, IntervalReloadConfig)
 }
 
 func (c *Config) Get(key string) (node interface{}, ok bool) {
-	c.Lock.Lock()
 	data := make(map[string]interface{}, 0)
 	for i, _ := range c.Data {
 		n := c.Data[i].(map[string]interface{})
 		data[n["id"].(string)] = n
 	}
-	c.Lock.Unlock()
-
 	node, ok = data[key]
+
 	return
 }
 
 func (c *Config) GetData() (data []interface{}) {
-	c.Lock.RLock()
 	data = c.Data
-	c.Lock.RUnlock()
 	return
 }
