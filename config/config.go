@@ -1,12 +1,12 @@
 package config
 
 import (
-	"ServerStatus/timer"
 	jsoniter "github.com/json-iterator/go"
 	"io/ioutil"
 	"log"
 	"os"
 	"sync"
+	"time"
 )
 
 var (
@@ -59,7 +59,8 @@ func (c *Config) parse() bool {
 }
 
 func (c *Config) reload() {
-	_ = timer.New(func() {
+	t := time.NewTicker(IntervalReloadConfig)
+	for range t.C {
 		fileInfo, _ := os.Stat(c.Filename)
 		currModifyTime := fileInfo.ModTime().Unix()
 		if currModifyTime > c.LastModifyTime {
@@ -67,7 +68,7 @@ func (c *Config) reload() {
 				c.C <- true
 			}
 		}
-	}, IntervalReloadConfig)
+	}
 }
 
 func (c *Config) Get(key string) (node interface{}, ok bool) {

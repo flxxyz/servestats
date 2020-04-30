@@ -4,7 +4,6 @@ import (
 	"ServerStatus/cmd"
 	"ServerStatus/config"
 	"ServerStatus/msg"
-	"ServerStatus/timer"
 	"ServerStatus/utils"
 	"bytes"
 	"fmt"
@@ -39,22 +38,20 @@ func auth() {
 
 //发送心跳
 func heartbeat(interval time.Duration) {
-	callback := func() {
+	t := time.NewTicker(interval)
+	for range t.C {
 		write(msg.Write(msg.HeartbeatMessage, params.Id))
 	}
-
-	timer.New(callback, interval)
 }
 
 //发送通过验证的消息
 func sent(interval time.Duration) {
-	callback := func() {
+	t := time.NewTicker(interval)
+	for range t.C {
 		sys.Update()
 		packet, _ := sys.Json()
 		write(msg.Write(msg.ReceiveMessage, params.Id, packet))
 	}
-
-	timer.New(callback, interval)
 }
 
 //发送关闭链接消息
