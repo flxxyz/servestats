@@ -147,7 +147,7 @@ func Run(p *cmd.Cmd) {
 			select {
 			case <-conf.C:
 				r.UpdateChan <- "reload"
-				utils.Echo("[Reload]", "config.json")
+				log.Println("[Reload]", "config.json")
 			case message := <-r.UpdateChan:
 				locker.Lock()
 				data := conf.GetData()
@@ -185,7 +185,7 @@ func Run(p *cmd.Cmd) {
 				r.Message = strings.Split(message, ":")[0]
 				r.Update(richNodeList)
 				locker.Unlock()
-				utils.Echo("[Update]", "message:"+message)
+				log.Println("[Update]", "message:"+message)
 			}
 		}
 	}()

@@ -5,9 +5,9 @@ import (
 	"ServerStatus/config"
 	"ServerStatus/msg"
 	"ServerStatus/timer"
-	"ServerStatus/utils"
 	"bytes"
 	"fmt"
+	"log"
 	"net"
 	"os"
 	"time"
@@ -89,19 +89,19 @@ func Run(p *cmd.Cmd) {
 		case msg.AuthorizeMessage:
 			auth()
 		case msg.SuccessAuthorizeMessage:
-			utils.Echo("[AUTHORIZE]", "success")
+			log.Println("[AUTHORIZE]", "success")
 			sent(p.Interval)
-			heartbeat(time.Second * config.IntervalHeartbeat)
+			heartbeat(config.IntervalHeartbeat)
 		case msg.HeartbeatMessage:
-			utils.Echo("[HEARTBEAT]")
+			log.Println("[HEARTBEAT]")
 		case msg.NotExistFailMessage:
-			utils.Echo("[FAIL]", "This node is not exist")
+			log.Println("[FAIL]", "This node is not exist")
 			closeSent()
 		case msg.NotEnableFailMessage:
-			utils.Echo("[FAIL]", "This node is not enable")
+			log.Println("[FAIL]", "This node is not enable")
 			closeSent()
 		case msg.CloseMessage:
-			utils.Echo("[CLOSE]")
+			log.Println("[CLOSE]")
 			closeSent()
 		}
 
