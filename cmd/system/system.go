@@ -7,15 +7,10 @@ import (
 	"time"
 )
 
-var sys *msg.SystemInfo
-
-func init() {
-	sys = &msg.SystemInfo{}
-}
-
 func Run(p *cmd.Cmd) {
 	_ = p
 
+	sys := msg.NewSystemInfo(true)
 	go sys.GetTraffic()
 	for {
 		sys.Update()

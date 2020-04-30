@@ -146,9 +146,10 @@ func Run(p *cmd.Cmd) {
 		for {
 			select {
 			case <-conf.C:
-				r.UpdateChan <- "reload"
 				log.Println("[Reload]", "config.json")
+				r.UpdateChan <- "reload"
 			case message := <-r.UpdateChan:
+				log.Println("[Update]", "message:"+message)
 				locker.Lock()
 				data := conf.GetData()
 				for i, _ := range data {
@@ -185,7 +186,6 @@ func Run(p *cmd.Cmd) {
 				r.Message = strings.Split(message, ":")[0]
 				r.Update(richNodeList)
 				locker.Unlock()
-				log.Println("[Update]", "message:"+message)
 			}
 		}
 	}()

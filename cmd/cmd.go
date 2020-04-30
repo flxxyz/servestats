@@ -8,12 +8,12 @@ import (
 )
 
 const (
-	Version    = "0.0.5"
+	Version    = "0.1.0"
 	Host       = ""
 	Port       = 9001
 	HTTPPort   = 9002
 	MultiCore  = true
-	Tick       = 3
+	Tick       = time.Second * 3
 	Filename   = "./config.json"
 	ID         = ""
 	HasConvStr = true

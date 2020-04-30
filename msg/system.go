@@ -11,6 +11,7 @@ import (
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/net"
 	"log"
+	"os/exec"
 	"runtime"
 	"sort"
 	"time"
@@ -35,6 +36,8 @@ var (
 		"reiserfs",
 		"fuseblk",
 	}
+	count   = "-c"
+	timeout = "-W"
 )
 
 type SystemInfo struct {
@@ -77,6 +80,18 @@ type SystemInfo struct {
 	TrafficTxStr      string `json:"traffic_tx_str" xml:"traffic_tx_str"`
 	TrafficTxTotal    uint64 `json:"traffic_tx_total" xml:"traffic_tx_total"`
 	TrafficTxTotalStr string `json:"traffic_tx_total_str" xml:"traffic_tx_total_str"`
+	IPv4Support       bool   `json:"ipv4_support" xml:"ipv4_support"`
+	IPv6Support       bool   `json:"ipv6_support" xml:"ipv6_support"`
+	OS                string `json:"os" xml:"os"`
+	ARCH              string `json:"arch" xml:"arch"`
+}
+
+func NewSystemInfo(hasConvStr bool) *SystemInfo {
+	return &SystemInfo{
+		HasConvStr: hasConvStr,
+		OS:         runtime.GOOS,
+		ARCH:       runtime.GOARCH,
+	}
 }
 
 func (sys *SystemInfo) getCpuInfo() {
@@ -195,13 +210,35 @@ func (sys *SystemInfo) GetTraffic() {
 		}
 		sys.TrafficTxTotal = netCard.BytesSent
 
-		time.Sleep(time.Second * config.IntervalRefreshTraffic)
+		time.Sleep(config.IntervalGetTraffic)
 	}
 }
 
-func (sys *SystemInfo) GetNet() (connections []net.ConnectionStat) {
-	connections, _ = net.Connections("inet6")
-	return
+func (sys *SystemInfo) CheckIPvNSupport() {
+	for {
+		if runtime.GOOS == "windows" {
+			count = "-n"
+			timeout = "-w"
+		}
+
+		cmd := exec.Command("ping", "-4", config.DnsIpv4, count, "1", timeout, "5")
+		err := cmd.Run()
+		if err != nil {
+			sys.IPv4Support = false
+		} else {
+			sys.IPv4Support = true
+		}
+
+		cmdIPv6 := exec.Command("ping", "-6", config.DnsIpv6, count, "1", timeout, "5")
+		errIPv6 := cmdIPv6.Run()
+		if errIPv6 != nil {
+			sys.IPv6Support = false
+		} else {
+			sys.IPv6Support = true
+		}
+
+		time.Sleep(config.IntervalCheckIPvNSupport)
+	}
 }
 
 func (sys *SystemInfo) ToString() {
@@ -267,6 +304,8 @@ func (sys *SystemInfo) Reset() {
 	sys.TrafficTxStr = ""
 	sys.TrafficTxTotal = 0
 	sys.TrafficTxTotalStr = ""
+	sys.OS = ""
+	sys.ARCH = ""
 }
 
 func (sys *SystemInfo) resetHDD() {
