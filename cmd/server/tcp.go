@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"github.com/panjf2000/gnet"
 	"log"
+	"strings"
 	"sync"
 )
 
@@ -181,7 +182,7 @@ func Run(p *cmd.Cmd) {
 					}
 				}
 
-				r.Message = message
+				r.Message = strings.Split(message, ":")[0]
 				r.Update(richNodeList)
 				locker.Unlock()
 				utils.Echo("[Update]", "message:"+message)
