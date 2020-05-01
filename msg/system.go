@@ -41,7 +41,7 @@ var (
 )
 
 type SystemInfo struct {
-	HasConvStr        bool `json:"-" xml:"-"`
+	hasConvStr        bool
 	err               error
 	cpuInfos          []cpu.InfoStat
 	load              *load.AvgStat
@@ -88,7 +88,7 @@ type SystemInfo struct {
 
 func NewSystemInfo(hasConvStr bool) *SystemInfo {
 	return &SystemInfo{
-		HasConvStr: hasConvStr,
+		hasConvStr: hasConvStr,
 		OS:         runtime.GOOS,
 		ARCH:       runtime.GOARCH,
 	}
@@ -187,8 +187,8 @@ func (sys *SystemInfo) getBootTime() {
 
 func (sys *SystemInfo) getUptime() {
 	sys.uptime = time.Now()
-	diff := sys.uptime.Unix() - sys.bootTime.Unix()
-	if sys.Uptime, sys.UptimeStr = utils.ComputeTimeDiff(diff); !sys.HasConvStr {
+	sys.Uptime = sys.uptime.Unix() - sys.bootTime.Unix()
+	if _, sys.UptimeStr = utils.ComputeTimeDiff(sys.Uptime); !sys.hasConvStr {
 		sys.UptimeStr = ""
 	}
 }
@@ -270,7 +270,7 @@ func (sys *SystemInfo) Update() {
 	sys.getBootTime()
 	sys.getUptime()
 
-	if sys.HasConvStr {
+	if sys.hasConvStr {
 		sys.ToString()
 	}
 }
