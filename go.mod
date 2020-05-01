@@ -1,4 +1,4 @@
-module ServerStatus
+module github.com/flxxyz/ServerStatus
 
 go 1.14
 
