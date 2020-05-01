@@ -1,10 +1,10 @@
 package traffic
 
 import (
-	"ServerStatus/cmd"
-	"ServerStatus/msg"
-	"ServerStatus/utils"
 	"fmt"
+	"github.com/flxxyz/ServerStatus/cmd"
+	"github.com/flxxyz/ServerStatus/msg"
+	"github.com/flxxyz/ServerStatus/utils"
 	"time"
 )
 

@@ -1,12 +1,12 @@
 package main
 
 import (
-	"ServerStatus/cmd"
-	"ServerStatus/cmd/client"
-	"ServerStatus/cmd/server"
-	"ServerStatus/cmd/system"
-	"ServerStatus/cmd/traffic"
-	"ServerStatus/cmd/uuid"
+	"github.com/flxxyz/ServerStatus/cmd"
+	"github.com/flxxyz/ServerStatus/cmd/client"
+	"github.com/flxxyz/ServerStatus/cmd/server"
+	"github.com/flxxyz/ServerStatus/cmd/system"
+	"github.com/flxxyz/ServerStatus/cmd/traffic"
+	"github.com/flxxyz/ServerStatus/cmd/uuid"
 )
 
 func main() {

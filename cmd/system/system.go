@@ -1,9 +1,9 @@
 package system
 
 import (
-	"ServerStatus/cmd"
-	"ServerStatus/msg"
 	"fmt"
+	"github.com/flxxyz/ServerStatus/cmd"
+	"github.com/flxxyz/ServerStatus/msg"
 	"time"
 )
 

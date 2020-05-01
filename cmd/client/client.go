@@ -1,12 +1,12 @@
 package client
 
 import (
-	"ServerStatus/cmd"
-	"ServerStatus/config"
-	"ServerStatus/msg"
-	"ServerStatus/utils"
 	"bytes"
 	"fmt"
+	"github.com/flxxyz/ServerStatus/cmd"
+	"github.com/flxxyz/ServerStatus/config"
+	"github.com/flxxyz/ServerStatus/msg"
+	"github.com/flxxyz/ServerStatus/utils"
 	"log"
 	"net"
 	"os"

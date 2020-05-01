@@ -1,8 +1,8 @@
 package msg
 
 import (
-	"ServerStatus/config"
-	"ServerStatus/utils"
+	"github.com/flxxyz/ServerStatus/config"
+	"github.com/flxxyz/ServerStatus/utils"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"

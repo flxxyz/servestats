@@ -1,8 +1,8 @@
 package server
 
 import (
-	"ServerStatus/cmd"
 	"fmt"
+	"github.com/flxxyz/ServerStatus/cmd"
 	"github.com/kataras/iris/v12"
 )
 

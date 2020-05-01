@@ -1,7 +1,7 @@
 package msg
 
 import (
-	"ServerStatus/config"
+	"github.com/flxxyz/ServerStatus/config"
 	"os/exec"
 	"runtime"
 	"testing"
