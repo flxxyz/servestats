@@ -2,6 +2,7 @@ package msg
 
 import (
 	"encoding/xml"
+	"sort"
 )
 
 type TypeMessage int
@@ -66,9 +67,16 @@ func (rsp *Response) XMLFormat(prefix, indent string) (data []byte, err error) {
 }
 
 func (rsp *Response) Update(richNodeList map[string]*RichNode) {
-	rsp.Servers = rsp.Servers[0:0]
+	keys := make([]string, 0)
 	for key, _ := range richNodeList {
-		rsp.Servers = append(rsp.Servers, richNodeList[key])
+		keys = append(keys, key)
+	}
+	sort.Strings(keys)
+
+	rsp.Servers = rsp.Servers[0:0]
+	for i, _ := range keys {
+		id := keys[i]
+		rsp.Servers = append(rsp.Servers, richNodeList[id])
 	}
 
 	return
