@@ -304,6 +304,8 @@ func (sys *SystemInfo) Reset() {
 	sys.TrafficTxStr = ""
 	sys.TrafficTxTotal = 0
 	sys.TrafficTxTotalStr = ""
+	sys.IPv4Support = false
+	sys.IPv6Support = false
 	sys.OS = ""
 	sys.ARCH = ""
 }
