@@ -333,6 +333,12 @@ func (sys *SystemInfo) JsonFormat(prefix, indent string) (data []byte, err error
 	return
 }
 
+type OS struct {
+	Name    string
+	Version string
+	Arch    string
+}
+
 func init() {
 	sort.Strings(ftypes)
 }

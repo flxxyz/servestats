@@ -2,10 +2,25 @@ package msg
 
 import (
 	"github.com/flxxyz/ServerStatus/config"
+	"github.com/flxxyz/ServerStatus/utils"
 	"os/exec"
 	"runtime"
 	"testing"
 )
+
+func TestOS(t *testing.T) {
+	switch runtime.GOOS {
+	case "windows":
+		os := utils.GetWindowsVersion()
+		t.Log(os)
+	case "linux":
+		os := utils.GetLinuxVersion()
+		t.Log(os)
+	default:
+		os := &OS{runtime.GOOS, "unknown", runtime.GOARCH}
+		t.Log(os)
+	}
+}
 
 func TestIPvN(t *testing.T) {
 	if runtime.GOOS == "windows" {
