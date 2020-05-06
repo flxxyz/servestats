@@ -53,7 +53,6 @@ func (c *Config) parse() bool {
 		log.Println("JSON Unmarshal error, ", err.Error())
 		return false
 	}
-	c.Lock.Unlock()
 
 	return true
 }
@@ -67,6 +66,7 @@ func (c *Config) reload() {
 			if c.parse() {
 				c.C <- true
 			}
+			c.Lock.Unlock()
 		}
 	}
 }
