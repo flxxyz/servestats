@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	Version    = "0.1.5"
+	Version    = "0.1.6"
 	Host       = ""
 	Port       = 9001
 	HTTPPort   = 9002

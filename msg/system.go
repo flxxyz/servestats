@@ -1,6 +1,7 @@
 package msg
 
 import (
+	"bytes"
 	"github.com/flxxyz/ServerStatus/config"
 	"github.com/flxxyz/ServerStatus/utils"
 	jsoniter "github.com/json-iterator/go"
@@ -10,8 +11,10 @@ import (
 	"github.com/shirou/gopsutil/load"
 	"github.com/shirou/gopsutil/mem"
 	"github.com/shirou/gopsutil/net"
+	"io/ioutil"
 	"log"
 	"os/exec"
+	"regexp"
 	"runtime"
 	"sort"
 	"time"
@@ -82,15 +85,21 @@ type SystemInfo struct {
 	TrafficTxTotalStr string `json:"traffic_tx_total_str" xml:"traffic_tx_total_str"`
 	IPv4Support       bool   `json:"ipv4_support" xml:"ipv4_support"`
 	IPv6Support       bool   `json:"ipv6_support" xml:"ipv6_support"`
-	OS                string `json:"os" xml:"os"`
-	ARCH              string `json:"arch" xml:"arch"`
+	OS                *OS    `json:"os" xml:"os"`
 }
 
 func NewSystemInfo(hasConvStr bool) *SystemInfo {
+	os := NewOS()
+	switch runtime.GOOS {
+	case "windows":
+		os = GetWindowsVersion()
+	case "linux":
+		os = GetLinuxVersion()
+	}
+
 	return &SystemInfo{
 		hasConvStr: hasConvStr,
-		OS:         runtime.GOOS,
-		ARCH:       runtime.GOARCH,
+		OS:         os,
 	}
 }
 
@@ -306,8 +315,7 @@ func (sys *SystemInfo) Reset() {
 	sys.TrafficTxTotalStr = ""
 	sys.IPv4Support = false
 	sys.IPv6Support = false
-	sys.OS = ""
-	sys.ARCH = ""
+	sys.OS = NewOS()
 }
 
 func (sys *SystemInfo) resetHDD() {
@@ -334,9 +342,82 @@ func (sys *SystemInfo) JsonFormat(prefix, indent string) (data []byte, err error
 }
 
 type OS struct {
-	Name    string
-	Version string
-	Arch    string
+	Name    string `json:"name" xml:"name"`
+	Version string `json:"version" xml:"version"`
+	Arch    string `json:"arch" xml:"arch"`
+}
+
+func NewOS() *OS {
+	return &OS{
+		Name:    runtime.GOOS,
+		Version: "unknown",
+		Arch:    runtime.GOARCH,
+	}
+}
+
+func GetWindowsVersion() (os *OS) {
+	version := "unknown"
+	versions := map[string]string{
+		`5\.0`:  "2000",
+		`5\.1`:  "XP",
+		`5\.2`:  "Server 2003",
+		`6\.0`:  "Vista",
+		`6\.1`:  "7",
+		`6\.2`:  "8",
+		`6\.3`:  "8.1",
+		`10\.0`: "10",
+	}
+
+	os = &OS{
+		Name:    runtime.GOOS,
+		Version: version,
+		Arch:    runtime.GOARCH,
+	}
+
+	cmd := exec.Command("cmd.exe")
+	out, _ := cmd.StdoutPipe()
+	buffer := bytes.NewBuffer(make([]byte, 0))
+	cmd.Start()
+	buffer.ReadFrom(out)
+	str, _ := buffer.ReadString(']')
+	cmd.Wait()
+	for key, _ := range versions {
+		re := regexp.MustCompile(`Microsoft Windows \[[\s\S]* ` + key + `\.[0-9]+\.[0-9]+\]`)
+		if re.MatchString(str) {
+			os.Version = versions[key]
+			return os
+		}
+	}
+
+	return
+}
+
+func GetLinuxVersion() *OS {
+	name := runtime.GOOS
+	version := "unknown"
+	if ok, _ := utils.PathExists("/etc/os-release"); ok {
+		cmd := exec.Command("cat", "/etc/os-release")
+		stdout, _ := cmd.StdoutPipe()
+		cmd.Start()
+		content, err := ioutil.ReadAll(stdout)
+		if err == nil {
+			id := regexp.MustCompile(`ID="?(.*?)"?\n`).FindStringSubmatch(string(content))
+			if len(id) > 1 {
+				name = id[1]
+			}
+
+			versionId := regexp.MustCompile(`VERSION_ID="?([.0-9]+)"?\n`).FindStringSubmatch(string(content))
+			if len(versionId) > 1 {
+				version = versionId[1]
+			}
+		}
+	}
+
+	return &OS{
+		Name:    name,
+		Version: version,
+		Arch:    runtime.GOARCH,
+	}
 }
 
 func init() {
