@@ -315,7 +315,6 @@ func (sys *SystemInfo) Reset() {
 	sys.TrafficTxTotalStr = ""
 	sys.IPv4Support = false
 	sys.IPv6Support = false
-	sys.OS = NewOS()
 }
 
 func (sys *SystemInfo) resetHDD() {
