@@ -356,23 +356,29 @@ func NewOS() *OS {
 }
 
 func GetWindowsVersion() (os *OS) {
-	version := "unknown"
-	versions := map[string]string{
+	os = NewOS()
+
+	versionNumbers := map[string]string{
 		`5\.0`:  "2000",
 		`5\.1`:  "XP",
 		`5\.2`:  "Server 2003",
-		`6\.0`:  "Vista",
-		`6\.1`:  "7",
-		`6\.2`:  "8",
-		`6\.3`:  "8.1",
+		`6\.0`:  "Server 2008",
+		`6\.1`:  "Server 2008 R2",
+		`6\.2`:  "Server 2012",
+		`6\.3`:  "Server 2012 R2",
 		`10\.0`: "10",
 	}
 
-	os = &OS{
-		Name:    runtime.GOOS,
-		Version: version,
-		Arch:    runtime.GOARCH,
-	}
+	//win10VersionNumbers := map[string]string{
+	//	`10\.0\.14300`: "Server 2016",
+	//	`10\.0\.14393`: "Server 2016",
+	//	`10\.0\.16299`: "Server 2016",
+	//	`10\.0\.17134`: "Server 2016",
+	//	`10\.0\.17677`: "Server 2019",
+	//	`10\.0\.17763`: "Server 2019",
+	//	`10\.0\.18362`: "Server 2019",
+	//	`10\.0\.18363`: "Server 2019",
+	//}
 
 	cmd := exec.Command("cmd.exe")
 	out, _ := cmd.StdoutPipe()
@@ -381,20 +387,32 @@ func GetWindowsVersion() (os *OS) {
 	buffer.ReadFrom(out)
 	str, _ := buffer.ReadString(']')
 	cmd.Wait()
-	for key, _ := range versions {
-		re := regexp.MustCompile(`Microsoft Windows \[[\s\S]* ` + key + `\.[0-9]+\.[0-9]+\]`)
+	for key, _ := range versionNumbers {
+		re := regexp.MustCompile(`Microsoft Windows \[[\s\S]* ` + key + `\.([0-9]+).?[0-9]*\]`)
 		if re.MatchString(str) {
-			os.Version = versions[key]
-			return os
+			if versionNumbers[key] != "10" {
+				os.Version = versionNumbers[key]
+			} else {
+				versionNumber := re.FindStringSubmatch(str)
+				if len(versionNumber) > 1 {
+					if utils.Str2Int(versionNumber[1]) <= 17134 {
+						os.Version = "Server 2016"
+					} else {
+						os.Version = "Server 2019"
+					}
+				}
+			}
+
+			return
 		}
 	}
 
 	return
 }
 
-func GetLinuxVersion() *OS {
-	name := runtime.GOOS
-	version := "unknown"
+func GetLinuxVersion() (os *OS) {
+	os = NewOS()
+
 	if ok, _ := utils.PathExists("/etc/os-release"); ok {
 		cmd := exec.Command("cat", "/etc/os-release")
 		stdout, _ := cmd.StdoutPipe()
@@ -403,21 +421,17 @@ func GetLinuxVersion() *OS {
 		if err == nil {
 			id := regexp.MustCompile(`ID="?(.*?)"?\n`).FindStringSubmatch(string(content))
 			if len(id) > 1 {
-				name = id[1]
+				os.Name = id[1]
 			}
 
 			versionId := regexp.MustCompile(`VERSION_ID="?([.0-9]+)"?\n`).FindStringSubmatch(string(content))
 			if len(versionId) > 1 {
-				version = versionId[1]
+				os.Version = versionId[1]
 			}
 		}
 	}
 
-	return &OS{
-		Name:    name,
-		Version: version,
-		Arch:    runtime.GOARCH,
-	}
+	return
 }
 
 func init() {
