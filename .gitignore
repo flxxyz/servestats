@@ -19,5 +19,4 @@
 .idea
 .vscode
 
-ServerStatus
-ServerStatus.exe
+ServerStatus*

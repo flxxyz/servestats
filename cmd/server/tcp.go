@@ -74,23 +74,22 @@ func (es *echoServer) React(frame []byte, c gnet.Conn) (out []byte, action gnet.
 		switch t[0] {
 		case msg.AuthorizeMessage:
 			if id, err := utils.TrimLine(buf); err == nil {
+				closer = false
 				strId := string(id[:])
 				if node, ok := conf.Get(strId); ok {
 					m := node.(map[string]interface{})
 					if m["enable"].(bool) {
 						es.sockets.Store(strId, c)
 						authorizes[c.RemoteAddr().String()] = strId
-						richNodeList[strId].Online = true
 						out = msg.Write(msg.SuccessAuthorizeMessage)
-						closer = false
 					} else {
 						out = msg.Write(msg.NotEnableFailMessage)
-						closer = false
 					}
 				} else {
 					out = msg.Write(msg.NotExistFailMessage)
-					closer = false
 				}
+			} else {
+				closer = true
 			}
 		case msg.ReceiveMessage:
 			////取出id
@@ -110,20 +109,16 @@ func (es *echoServer) React(frame []byte, c gnet.Conn) (out []byte, action gnet.
 				strId := string(id[:])
 				if _, ok := conf.Get(strId); ok {
 					out = msg.Write(msg.HeartbeatMessage, "pong")
+					richNodeList[strId].Online = true
 					closer = false
 				}
 			}
 		case msg.CloseMessage:
 			//主动关闭
-			closer = true
-		default:
-			//不明来历链接全关咯
-			closer = true
 		}
 
 		if closer {
 			_ = c.Close()
-			return
 		}
 	}
 
@@ -139,63 +134,66 @@ func init() {
 	r = msg.NewResponse("init", make(map[string]*msg.RichNode, 0))
 }
 
+func updateConfigChannel() {
+	for {
+		select {
+		case <-conf.C:
+			log.Println("[Reload]", "config.json")
+			r.UpdateChan <- "reload"
+		case message := <-r.UpdateChan:
+			log.Println("[Update]", "message:"+message)
+			locker.Lock()
+			data := conf.GetData()
+			for i, _ := range data {
+				m := data[i].(map[string]interface{})
+				id := m["id"].(string)
+
+				if _, ok := richNodeList[id]; !ok {
+					node := &msg.Node{
+						Id:       id,
+						Name:     m["name"].(string),
+						Location: m["location"].(string),
+						Enable:   m["enable"].(bool),
+						Region:   m["region"].(string),
+					}
+
+					richNodeList[id] = msg.NewRichNode(node, &msg.SystemInfo{}, false)
+				}
+
+				checkNodeList[id] = true
+			}
+
+			//清除配置中不存在的节点
+			for id, _ := range checkNodeList {
+				if _, ok := conf.Get(id); !ok {
+					delete(richNodeList, id)
+					delete(checkNodeList, id)
+
+					if c, ok := echo.sockets.Load(id); ok {
+						_ = c.(gnet.Conn).Close()
+					}
+				}
+			}
+
+			r.Message = strings.Split(message, ":")[0]
+			r.Update(richNodeList)
+			locker.Unlock()
+		}
+	}
+}
+
+func tcpServer(host string, port int, multicore bool) {
+	log.Fatal(gnet.Serve(echo,
+		fmt.Sprintf("tcp://%s:%d", host, port),
+		gnet.WithMulticore(multicore)))
+}
+
 func Run(p *cmd.Cmd) {
 	conf = config.NewConfig(p.Filename, make([]interface{}, 0))
 
-	go func() {
-		for {
-			select {
-			case <-conf.C:
-				log.Println("[Reload]", "config.json")
-				r.UpdateChan <- "reload"
-			case message := <-r.UpdateChan:
-				log.Println("[Update]", "message:"+message)
-				locker.Lock()
-				data := conf.GetData()
-				for i, _ := range data {
-					m := data[i].(map[string]interface{})
-					id := m["id"].(string)
-
-					if _, ok := richNodeList[id]; !ok {
-						node := &msg.Node{
-							Id:       id,
-							Name:     m["name"].(string),
-							Location: m["location"].(string),
-							Enable:   m["enable"].(bool),
-							Region:   m["region"].(string),
-						}
-
-						richNodeList[id] = msg.NewRichNode(node, &msg.SystemInfo{}, false)
-					}
-
-					checkNodeList[id] = true
-				}
-
-				//清除配置中不存在的节点
-				for id, _ := range checkNodeList {
-					if _, ok := conf.Get(id); !ok {
-						delete(richNodeList, id)
-						delete(checkNodeList, id)
-
-						if c, ok := echo.sockets.Load(id); ok {
-							_ = c.(gnet.Conn).Close()
-						}
-					}
-				}
-
-				r.Message = strings.Split(message, ":")[0]
-				r.Update(richNodeList)
-				locker.Unlock()
-			}
-		}
-	}()
-
+	go updateConfigChannel()
 	r.UpdateChan <- "init"
 
-	go func() {
-		log.Fatal(gnet.Serve(echo,
-			fmt.Sprintf("tcp://%s:%d", p.Host, p.Port),
-			gnet.WithMulticore(p.Multicore)))
-	}()
-	httpRun(p)
+	go tcpServer(p.Host, p.Port, p.Multicore)
+	httpServer(p.Host, p.HTTPPort)
 }

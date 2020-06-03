@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	Version    = "0.1.6"
+	Version    = "0.1.7"
 	Host       = ""
 	Port       = 9001
 	HTTPPort   = 9002
@@ -16,7 +16,7 @@ const (
 	Tick       = time.Second * 3
 	Filename   = "./config.json"
 	ID         = ""
-	HasConvStr = true
+	OutputText = true
 )
 
 var (
@@ -29,7 +29,7 @@ var (
 	interval   time.Duration
 	filename   string
 	id         string
-	hasConvStr bool
+	outputText bool
 )
 
 type Params struct {
@@ -40,11 +40,11 @@ type Params struct {
 	Interval   time.Duration
 	Filename   string
 	Id         string
-	HasConvStr bool
+	OutputText bool
 }
 
 func NewParams(host string, port, httpPort int, multicore bool,
-	interval time.Duration, filename string, id string, hasConvStr bool) (p *Params) {
+	interval time.Duration, filename string, id string, outputText bool) (p *Params) {
 	return &Params{
 		Host:       host,
 		Port:       port,
@@ -53,7 +53,7 @@ func NewParams(host string, port, httpPort int, multicore bool,
 		Interval:   interval,
 		Filename:   filename,
 		Id:         id,
-		HasConvStr: hasConvStr,
+		OutputText: outputText,
 	}
 }
 
@@ -110,7 +110,7 @@ func handlerClient(args []string) {
 	clientCmd.BoolVar(&multicore, "m", MultiCore, "multicore")
 	clientCmd.DurationVar(&interval, "t", Tick, "pushing tick")
 	clientCmd.StringVar(&id, "id", ID, "uuid")
-	clientCmd.BoolVar(&hasConvStr, "s", HasConvStr, "convert string")
+	clientCmd.BoolVar(&outputText, "s", OutputText, "output description in everyday language")
 	clientCmd.Parse(args)
 }
 
@@ -152,5 +152,5 @@ func Run() *Cmd {
 		unknownCommand()
 	}
 
-	return NewCmd(t, NewParams(host, port, httpPort, multicore, interval, filename, id, hasConvStr))
+	return NewCmd(t, NewParams(host, port, httpPort, multicore, interval, filename, id, outputText))
 }

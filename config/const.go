@@ -5,9 +5,12 @@ import "time"
 const (
 	IntervalReloadConfig     = time.Second * 5
 	IntervalSent             = time.Second * 3
-	IntervalHeartbeat        = time.Minute * 1
+	IntervalHeartbeat        = time.Second * 30
 	IntervalGetTraffic       = time.Second * 1
-	IntervalCheckIPvNSupport = time.Second * 30
+	IntervalCheckIPvNSupport = time.Second * 10
+	IntervalReconnect        = time.Second * 3
+	TimeoutReadDeadline      = time.Minute * 60
+	MessageBufferSize        = 4096
 )
 
 const (
