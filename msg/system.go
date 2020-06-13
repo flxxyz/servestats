@@ -106,7 +106,8 @@ func NewSystemInfo(outputText bool) *SystemInfo {
 func (sys *SystemInfo) getCpuInfo() {
 	sys.cpuInfos, sys.err = cpu.Info()
 	if sys.err != nil {
-		log.Fatal("[getCpuInfo] cpu.Info() Error: ", sys.err.Error())
+		log.Println("[getCpuInfo] cpu.Info() Error: ", sys.err.Error())
+		return
 	}
 
 	sys.CpuCore = 0
@@ -121,7 +122,8 @@ func (sys *SystemInfo) getCpuInfo() {
 func (sys *SystemInfo) getCpuPercent() {
 	p, err := cpu.Percent(time.Second, false)
 	if err != nil {
-		log.Fatal("[getCpuPercent] cpu.Percent() Error: ", err.Error())
+		log.Println("[getCpuPercent] cpu.Percent() Error: ", err.Error())
+		return
 	}
 
 	sys.CpuPercent = utils.Decimal(p[0], 2)
@@ -131,7 +133,8 @@ func (sys *SystemInfo) getLoad() {
 	if runtime.GOOS != "windows" {
 		sys.load, sys.err = load.Avg()
 		if sys.err != nil {
-			log.Fatal("[getCpuPercent] load.Avg() Error: ", sys.err.Error())
+			log.Println("[getCpuPercent] load.Avg() Error: ", sys.err.Error())
+			return
 		}
 
 		sys.LoadAvg[0] = utils.Decimal(sys.load.Load1/float64(sys.CpuCore), 2)
@@ -143,7 +146,8 @@ func (sys *SystemInfo) getLoad() {
 func (sys *SystemInfo) getMem() {
 	m, err := mem.VirtualMemory()
 	if err != nil {
-		log.Fatal("[getCpuPercent] mem.VirtualMemory() Error: ", err.Error())
+		log.Println("[getCpuPercent] mem.VirtualMemory() Error: ", err.Error())
+		return
 	}
 
 	sys.MemTotal = m.Total
@@ -154,7 +158,8 @@ func (sys *SystemInfo) getMem() {
 func (sys *SystemInfo) getSwap() {
 	s, err := mem.SwapMemory()
 	if err != nil {
-		log.Fatal("[getCpuPercent] mem.SwapMemory() Error: ", err.Error())
+		log.Println("[getCpuPercent] mem.SwapMemory() Error: ", err.Error())
+		return
 	}
 
 	sys.SwapTotal = s.Total
@@ -165,7 +170,8 @@ func (sys *SystemInfo) getSwap() {
 func (sys *SystemInfo) getHDD() {
 	parts, err := disk.Partitions(true)
 	if err != nil {
-		log.Fatal("[getHDD] disk.Partitions() Error: ", err.Error())
+		log.Println("[getHDD] disk.Partitions() Error: ", err.Error())
+		return
 	}
 
 	sys.resetHDD()
@@ -173,7 +179,8 @@ func (sys *SystemInfo) getHDD() {
 	for _, part := range parts {
 		d, err := disk.Usage(part.Mountpoint)
 		if err != nil {
-			log.Fatal("[getHDD] disk.Usage() Error: ", err.Error())
+			log.Println("[getHDD] disk.Usage() Error: ", err.Error())
+			return
 		}
 
 		i := sort.SearchStrings(ftypes, d.Fstype)
@@ -188,7 +195,8 @@ func (sys *SystemInfo) getHDD() {
 func (sys *SystemInfo) getBootTime() {
 	timestamp, err := host.BootTime()
 	if err != nil {
-		log.Fatal("[getBootTime] host.BootTime() Error: ", err.Error())
+		log.Println("[getBootTime] host.BootTime() Error: ", err.Error())
+		return
 	}
 
 	sys.bootTime = time.Unix(int64(timestamp), 0).Local()

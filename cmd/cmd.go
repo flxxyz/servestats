@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	Version    = "0.1.7"
+	Version    = "0.1.8"
 	Host       = ""
 	Port       = 9001
 	HTTPPort   = 9002
@@ -99,7 +99,6 @@ func handlerServer(args []string) {
 	serverCmd.IntVar(&port, "p", Port, "listen tcp port")
 	serverCmd.IntVar(&httpPort, "hp", HTTPPort, "listen http port")
 	serverCmd.BoolVar(&multicore, "m", MultiCore, "multicore")
-	serverCmd.DurationVar(&interval, "t", Tick, "pushing tick")
 	serverCmd.StringVar(&filename, "c", Filename, "use config.json")
 	serverCmd.Parse(args)
 }
