@@ -18,7 +18,7 @@ else
 		OS_NAME=darwin
 	endif
 
-	UNAME_P=$(shell uname -p)
+	UNAME_P=$(shell uname -m)
 	ifeq ($(UNAME_P),x86_64)
 		ARCH_NAME=amd64
 	endif
