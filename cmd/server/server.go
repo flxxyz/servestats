@@ -20,9 +20,8 @@ func Run(p *cmd.Cmd) {
 		runtime.GOMAXPROCS(runtime.NumCPU())
 	}
 
-	addr := fmt.Sprintf("%s:%d", p.Host, p.Port)
-	go RPCServer(addr)
-	HTTPServer(addr)
+	go RPCServer(fmt.Sprintf("%s:%d", p.Host, p.Port))
+	HTTPServer(fmt.Sprintf("%s:%d", p.Host, p.HTTPPort))
 }
 
 func init() {
