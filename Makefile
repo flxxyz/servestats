@@ -43,6 +43,9 @@ build: clean
 win:
 	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -v -gcflags "all=-N -l" -trimpath -o ServerStatus_windows_amd64.exe
 
+arm64:
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -v -gcflags "all=-N -l" -trimpath -o ServerStatus_linux_arm64
+
 server: build
 	./$(FILE_NAME) server
 
