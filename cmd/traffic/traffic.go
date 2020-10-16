@@ -2,10 +2,11 @@ package traffic
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/flxxyz/ServerStatus/cmd"
 	"github.com/flxxyz/ServerStatus/msg"
 	"github.com/flxxyz/ServerStatus/utils"
-	"time"
 )
 
 var sys *msg.SystemInfo

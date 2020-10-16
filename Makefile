@@ -47,7 +47,13 @@ server: build
 	./$(FILE_NAME) server
 
 client: build
-	./$(FILE_NAME) client -t 1s -id c91f4a1b-865b-435e-8e0a-f35a0557e19d -s=false
+	./$(FILE_NAME) client -t 1s -id c91f4a1b-865b-435e-8e0a-f35a0557e19d
+
+system: build
+	./$(FILE_NAME) system
+
+traffic: build
+	./$(FILE_NAME) traffic
 
 clean:
 	rm -rf $(FILE_NAME)

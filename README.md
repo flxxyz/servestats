@@ -15,7 +15,7 @@
 3. `./ServerStatus uuid` 复制生成的唯一id
 4. 将客户端信息填入服务端`config.json`中
 5. 执行`./ServerStatus client -h [服务器地址] -p 服务器端口 -id [客户端id]`接入，默认参数可忽略
-6. 显示`[AUTHORIZE] success`即为连接成功
+6. 服务端控制台收到当前客户端消息即为连接成功
 
 ## 读取数据
 - [x] http: [server ip]:9002
@@ -24,12 +24,12 @@
 ## 更多命令
 执行 `ServerStatus help` 命令获取更多参数信息
 ```text
-ServerStatus version: ServerStatus/0.1.6
+ServerStatus version: ServerStatus/0.2.0
 Usage: ServerStatus <command>
 
 Available commands:
     server               {启动服务端 [ServerStatus server [-h host] [-p TCPPort] [-hp HTTPPort] [-m multicore] [-c filename]]}
-    client               {启动客户端, -s 转换相关字段为字符串(默认开启) [ServerStatus client [-s=false] [-h host] [-p port] [-m multicore] [-t tick] [-id uuid]]}
+    client               {启动客户端, -s [ServerStatus client [-h host] [-p port] [-m multicore] [-t tick] [-id uuid]]}
     system               {输出系统当前的参数 [ServerStatus system]}
     uuid                 {生成uuid [ServerStatus uuid]}
     traffic              {监听网卡实时流量 [ServerStatus traffic]}

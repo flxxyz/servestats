@@ -2,20 +2,22 @@ package system
 
 import (
 	"fmt"
+	"time"
+
 	"github.com/flxxyz/ServerStatus/cmd"
 	"github.com/flxxyz/ServerStatus/msg"
-	"time"
 )
 
 func Run(p *cmd.Cmd) {
 	_ = p
 
-	sys := msg.NewSystemInfo(true)
-	go sys.GetTraffic()
+	sysInfo := msg.NewSystemInfo()
+	go sysInfo.CheckIPvNSupport()
+	go sysInfo.GetTraffic()
 	for {
-		sys.Update()
+		sysInfo.Update()
 		time.Sleep(time.Second)
-		data, _ := sys.Json()
+		data, _ := sysInfo.JsonFormat("", "    ")
 		fmt.Printf("\u001B[2J\u001B[0;0H%s\n", string(data[:]))
 	}
 }

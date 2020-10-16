@@ -2,8 +2,8 @@ package server
 
 import (
 	"compress/gzip"
-	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"strings"
 )
@@ -50,10 +50,11 @@ func handler(w http.ResponseWriter, _ *http.Request) {
 	NoCacheCorsMiddleware(w.Header())
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	data, _ := r.Json()
-	w.Write(data)
+	data, _ := response.Json()
+	_, _ = w.Write(data)
 }
 
-func httpServer(host string, port int) {
-	http.ListenAndServe(fmt.Sprintf("%s:%d", host, port), handlerGzipFunc(handler))
+func HTTPServer(addr string) {
+	log.Println("[HTTPServer]", addr)
+	log.Fatal(http.ListenAndServe(addr, handlerGzipFunc(handler)))
 }

@@ -3,17 +3,14 @@ package config
 import "time"
 
 const (
-	IntervalReloadConfig     = time.Second * 5
-	IntervalSent             = time.Second * 3
-	IntervalHeartbeat        = time.Second * 30
-	IntervalGetTraffic       = time.Second * 1
-	IntervalCheckIPvNSupport = time.Second * 10
-	IntervalReconnect        = time.Second * 3
-	TimeoutReadDeadline      = time.Minute * 60
-	MessageBufferSize        = 4096
+	IvReloadConfig     = time.Second * 3  //客户端重新加载配置文件
+	IvSent             = time.Second * 3  //客户端发送消息
+	IvGetTraffic       = time.Second * 1  //客户端更新流量
+	IvCheckIPvNSupport = time.Second * 10 //客户端检查IP支持
+	IvReconnect        = time.Second * 5  //客户端重连
 )
 
 const (
-	DnsIpv4 = "199.85.126.10"        //Norton ConnectSafe
-	DnsIpv6 = "2606:4700:4700::1111" //Cloudflare
+	DnsIpv4 = "223.5.5.5"    //Aliyun DNS
+	DnsIpv6 = "2400:3200::1" //Aliyun DNS
 )

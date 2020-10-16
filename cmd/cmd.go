@@ -8,52 +8,48 @@ import (
 )
 
 const (
-	Version    = "0.1.8"
-	Host       = ""
-	Port       = 9001
-	HTTPPort   = 9002
-	MultiCore  = true
-	Tick       = time.Second * 3
-	Filename   = "./config.json"
-	ID         = ""
-	OutputText = true
+	Version   = "0.2.0"
+	Host      = ""
+	Port      = 9001
+	HTTPPort  = 9002
+	MultiCore = true
+	Tick      = time.Second * 3
+	Filename  = "./config.json"
+	ID        = ""
 )
 
 var (
 	serverCmd, clientCmd, uuidCmd, systemCmd, trafficCmd *flag.FlagSet
 
-	host       string
-	port       int
-	httpPort   int
-	multicore  bool
-	interval   time.Duration
-	filename   string
-	id         string
-	outputText bool
+	host      string
+	port      int
+	httpPort  int
+	multicore bool
+	interval  time.Duration
+	filename  string
+	id        string
 )
 
 type Params struct {
-	Host       string
-	Port       int
-	HTTPPort   int
-	Multicore  bool
-	Interval   time.Duration
-	Filename   string
-	Id         string
-	OutputText bool
+	Host      string
+	Port      int
+	HTTPPort  int
+	Multicore bool
+	Interval  time.Duration
+	Filename  string
+	Id        string
 }
 
 func NewParams(host string, port, httpPort int, multicore bool,
-	interval time.Duration, filename string, id string, outputText bool) (p *Params) {
+	interval time.Duration, filename string, id string) (p *Params) {
 	return &Params{
-		Host:       host,
-		Port:       port,
-		HTTPPort:   httpPort,
-		Multicore:  multicore,
-		Interval:   interval,
-		Filename:   filename,
-		Id:         id,
-		OutputText: outputText,
+		Host:      host,
+		Port:      port,
+		HTTPPort:  httpPort,
+		Multicore: multicore,
+		Interval:  interval,
+		Filename:  filename,
+		Id:        id,
 	}
 }
 
@@ -80,7 +76,7 @@ Usage: ServerStatus <command>
 
 Available commands:
     server               {启动服务端 [ServerStatus server [-h host] [-p TCPPort] [-hp HTTPPort] [-m multicore] [-c filename]]}
-    client               {启动客户端, -s 转换相关字段为字符串(默认开启) [ServerStatus client [-s=false] [-h host] [-p port] [-m multicore] [-t tick] [-id uuid]]}
+    client               {启动客户端 [ServerStatus client [-h host] [-p port] [-m multicore] [-t tick] [-id uuid]]}
     system               {输出系统当前的参数 [ServerStatus system]}
     uuid                 {生成uuid [ServerStatus uuid]}
     traffic              {监听网卡实时流量 [ServerStatus traffic]}
@@ -109,7 +105,6 @@ func handlerClient(args []string) {
 	clientCmd.BoolVar(&multicore, "m", MultiCore, "multicore")
 	clientCmd.DurationVar(&interval, "t", Tick, "pushing tick")
 	clientCmd.StringVar(&id, "id", ID, "uuid")
-	clientCmd.BoolVar(&outputText, "s", OutputText, "output description in everyday language")
 	clientCmd.Parse(args)
 }
 
@@ -151,5 +146,5 @@ func Run() *Cmd {
 		unknownCommand()
 	}
 
-	return NewCmd(t, NewParams(host, port, httpPort, multicore, interval, filename, id, outputText))
+	return NewCmd(t, NewParams(host, port, httpPort, multicore, interval, filename, id))
 }
