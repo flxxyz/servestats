@@ -1,7 +1,7 @@
 package server
 
 import (
-	"github.com/flxxyz/ServerStatus/msg"
+	"github.com/flxxyz/servestats/msg"
 	"log"
 	"net"
 	"net/http"

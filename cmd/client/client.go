@@ -6,9 +6,9 @@ import (
 	"net/rpc"
 	"time"
 
-	"github.com/flxxyz/ServerStatus/cmd"
-	"github.com/flxxyz/ServerStatus/config"
-	"github.com/flxxyz/ServerStatus/msg"
+	"github.com/flxxyz/servestats/cmd"
+	"github.com/flxxyz/servestats/config"
+	"github.com/flxxyz/servestats/msg"
 )
 
 type RpcClient struct {

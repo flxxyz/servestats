@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/flxxyz/ServerStatus/cmd"
-	"github.com/flxxyz/ServerStatus/cmd/client"
-	"github.com/flxxyz/ServerStatus/cmd/server"
-	"github.com/flxxyz/ServerStatus/cmd/system"
-	"github.com/flxxyz/ServerStatus/cmd/traffic"
-	"github.com/flxxyz/ServerStatus/cmd/uuid"
+	"github.com/flxxyz/servestats/cmd"
+	"github.com/flxxyz/servestats/cmd/client"
+	"github.com/flxxyz/servestats/cmd/server"
+	"github.com/flxxyz/servestats/cmd/system"
+	"github.com/flxxyz/servestats/cmd/traffic"
+	"github.com/flxxyz/servestats/cmd/uuid"
 )
 
 func main() {

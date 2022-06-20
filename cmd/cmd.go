@@ -71,16 +71,16 @@ func init() {
 }
 
 func usage() {
-	fmt.Fprintf(os.Stderr, `ServerStatus version: ServerStatus/%s
-Usage: ServerStatus <command>
+	fmt.Fprintf(os.Stderr, `servestats version: servestats/%s
+Usage: servestats <command>
 
 Available commands:
-    server               {启动服务端 [ServerStatus server [-h host] [-p TCPPort] [-hp HTTPPort] [-m multicore] [-c filename]]}
-    client               {启动客户端 [ServerStatus client [-h host] [-p port] [-m multicore] [-t tick] [-id uuid]]}
-    system               {输出系统当前的参数 [ServerStatus system]}
-    uuid                 {生成uuid [ServerStatus uuid]}
-    traffic              {监听网卡实时流量 [ServerStatus traffic]}
-    help                 {帮助 [ServerStatus help [--help]]}
+    server               {启动服务端 [servestats server [-h host] [-p TCPPort] [-hp HTTPPort] [-m multicore] [-c filename]]}
+    client               {启动客户端 [servestats client [-h host] [-p port] [-m multicore] [-t tick] [-id uuid]]}
+    system               {输出系统当前的参数 [servestats system]}
+    uuid                 {生成uuid [servestats uuid]}
+    traffic              {监听网卡实时流量 [servestats traffic]}
+    help                 {帮助 [servestats help [--help]]}
 `, Version)
 	flag.PrintDefaults()
 }

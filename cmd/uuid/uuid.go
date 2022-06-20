@@ -2,7 +2,7 @@ package uuid
 
 import (
 	"fmt"
-	"github.com/flxxyz/ServerStatus/cmd"
+	"github.com/flxxyz/servestats/cmd"
 	uuid "github.com/satori/go.uuid"
 )
 

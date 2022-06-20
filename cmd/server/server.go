@@ -2,11 +2,11 @@ package server
 
 import (
 	"fmt"
-	"github.com/flxxyz/ServerStatus/msg"
+	"github.com/flxxyz/servestats/msg"
 	"runtime"
 
-	"github.com/flxxyz/ServerStatus/cmd"
-	"github.com/flxxyz/ServerStatus/config"
+	"github.com/flxxyz/servestats/cmd"
+	"github.com/flxxyz/servestats/config"
 )
 
 var (

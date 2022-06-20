@@ -5,7 +5,7 @@ import (
 	jsoniter "github.com/json-iterator/go"
 	"reflect"
 
-	"github.com/flxxyz/ServerStatus/config"
+	"github.com/flxxyz/servestats/config"
 )
 
 const (

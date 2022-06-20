@@ -33,7 +33,7 @@ else
 	endif
 endif
 
-FILE_NAME=ServerStatus_$(OS_NAME)_$(ARCH_NAME)$(EXT_NAME)
+FILE_NAME=servestats_$(OS_NAME)_$(ARCH_NAME)$(EXT_NAME)
 
 all: build
 
@@ -41,10 +41,10 @@ build: clean
 	CGO_ENABLED=0 GOOS=$(OS_NAME) GOARCH=$(ARCH_NAME) go build -v -gcflags "all=-N -l" -trimpath -o $(FILE_NAME)
 
 win:
-	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -v -gcflags "all=-N -l" -trimpath -o ServerStatus_windows_amd64.exe
+	CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -v -gcflags "all=-N -l" -trimpath -o servestats_windows_amd64.exe
 
 arm64:
-	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -v -gcflags "all=-N -l" -trimpath -o ServerStatus_linux_arm64
+	CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -v -gcflags "all=-N -l" -trimpath -o servestats_linux_arm64
 
 server: build
 	./$(FILE_NAME) server

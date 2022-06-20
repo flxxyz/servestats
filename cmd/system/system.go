@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/flxxyz/ServerStatus/cmd"
-	"github.com/flxxyz/ServerStatus/msg"
+	"github.com/flxxyz/servestats/cmd"
+	"github.com/flxxyz/servestats/msg"
 )
 
 func Run(p *cmd.Cmd) {

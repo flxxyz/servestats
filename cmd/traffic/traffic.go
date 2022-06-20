@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/flxxyz/ServerStatus/cmd"
-	"github.com/flxxyz/ServerStatus/msg"
-	"github.com/flxxyz/ServerStatus/utils"
+	"github.com/flxxyz/servestats/cmd"
+	"github.com/flxxyz/servestats/msg"
+	"github.com/flxxyz/servestats/utils"
 )
 
 var sys *msg.SystemInfo

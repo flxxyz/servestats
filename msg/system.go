@@ -7,8 +7,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/flxxyz/ServerStatus/config"
-	"github.com/flxxyz/ServerStatus/utils"
+	"github.com/flxxyz/servestats/config"
+	"github.com/flxxyz/servestats/utils"
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/disk"
 	"github.com/shirou/gopsutil/host"
